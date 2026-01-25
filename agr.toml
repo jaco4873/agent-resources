@@ -1,1 +1,11 @@
-dependencies = []
+dependencies = [
+    {path = "./brainstorm", type = "skill"},
+    {path = "./bug-fix", type = "skill"},
+    {path = "./dead-code", type = "skill"},
+    {path = "./explain", type = "skill"},
+    {path = "./implement", type = "skill"},
+    {path = "./standardize", type = "skill"},
+    {path = "./triage", type = "skill"},
+    {path = "./weakness-analysis", type = "skill"},
+    {path = "claude-init", type = "skill"},
+]

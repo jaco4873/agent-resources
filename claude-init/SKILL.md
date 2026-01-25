@@ -1,3 +1,7 @@
+---
+name: claude-init
+---
+
 ______________________________________________________________________
 
 ## description: Generate production-grade CLAUDE.md files for this codebase with root and domain-specific files
