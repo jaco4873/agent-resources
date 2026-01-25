@@ -248,18 +248,9 @@ For each step that becomes a PR/issue:
 
 #### 6.1 Confirm with User
 
-Present the complete plan and ask:
+After presenting the complete implementation plan, ask the user in plain text (NOT using AskUserQuestion tool) whether they want issues created. This allows the user to review the full plan without being blocked by a modal dialog.
 
-```
-I've prepared an implementation plan with [N] phases and [M] individual steps.
-
-Would you like me to create issues for tracking?
-- GitHub Issues
-- Linear Issues
-- No issues (just keep the plan)
-```
-
-Use `AskUserQuestion` for this choice.
+**Important**: Do NOT use the `AskUserQuestion` tool here. The user should be able to scroll through and review the entire plan before responding.
 
 #### 6.2 Create Parent Issue
 
