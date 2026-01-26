@@ -6,60 +6,77 @@ argument-hint: [issue ID] or "all" for batch processing
 
 # Triage: $ARGUMENTS
 
-Add a brief AI analysis to issues in triage. The output must be **short enough that people actually read it**.
+Add **actionable** AI analysis to issues in triage. The output should be scannable but substantive - provide enough context that developers can estimate and prioritize without re-investigating.
 
 ## Output Format
 
-**CRITICAL**: The analysis must be 5-8 lines max. No walls of text.
+Use this structured template (adapt sections based on issue complexity):
 
 ```markdown
 ## 🤖 AI Triage
 
-**Area**: [1-2 code locations max]
-**Size**: [Small / Medium / Large]
-**Watch out**: [0-2 non-obvious gotchas, or "None"]
+### Current State
+[1-3 sentences explaining how the system currently works in this area]
 
-❓ [Any clarifying questions for the reporter, or omit this line]
+### Files to Change
+1. **[Layer/Purpose]**: `path/to/file.py:lines` - what changes
+2. **[Layer/Purpose]**: `path/to/file.py:lines` - what changes
+[List 2-6 files with specific line references]
+
+### Size Estimate
+**[Small/Medium/Large]** - [Brief justification: file count, layers touched, complexity]
+
+### Watch Out
+- [Non-obvious consideration 1]
+- [Non-obvious consideration 2, or "None identified"]
+
+### Approach Options (if applicable)
+1. **[Option name]**: [Trade-offs]
+2. **[Option name]**: [Trade-offs]
+
+❓ [Clarifying questions for reporter, if genuinely unclear]
 ```
 
 ### Size Guidelines
 
-| Size | Meaning |
-|------|---------|
-| **Small** | Single file, straightforward change |
-| **Medium** | 2-4 files, may touch multiple layers |
-| **Large** | Cross-cutting, multiple domains, or needs design decisions |
+| Size | Meaning | Typical Scope |
+|------|---------|---------------|
+| **Small** | Single concern | 1-2 files, one layer, straightforward pattern |
+| **Medium** | Multi-layer | 3-5 files, crosses service/repository/API boundaries |
+| **Large** | Cross-cutting | 6+ files, multiple domains, design decisions needed, migrations |
 
-### Examples
+### Example: Good Analysis
 
-**Good** (people will read this):
 ```markdown
 ## 🤖 AI Triage
 
-**Area**: `src/core/enrichment/services.py`, `src/graph/enrichment/`
-**Size**: Medium - service + repository changes
-**Watch out**: Existing enrichment tests may need updates
+### Current State
+Attribute value translations are stored in PostgreSQL with `data_by_locale: dict[Locale, AttributeValueData]`. Every query fetches ALL locales via `get_latest_attribute_value()`, even when only one is needed.
 
-❓ Should this work for all attribute types or just text?
-```
+### Files to Change
+1. **Repository interface**: `src/core/cernel/core/attribute_value/repository/attribute_value.py` - Add `locale` param
+2. **PostgreSQL impl**: `src/infrastructure/cernel/postgres/repository/attribute_value.py:216-264` - Filter SQL by locale
+3. **Neo4j queries**: `src/graph/cernel/graph/queries/attribute.py:28-43` - Add locale filter to translation matching
+4. **API router**: `src/internal_api/cernel/internal_api/routers/attributes.py` - Accept `?locale=` query param
 
-**Bad** (nobody reads this):
-```markdown
-## 🤖 AI Technical Analysis
+### Size Estimate
+**Medium** - 4 files across repository, query, and API layers. Pattern is clear but touches multiple tiers.
 
-### Affected Areas
-- `src/core/enrichment/services.py` - Main service logic
-- `src/core/enrichment/specifications.py` - Data models
-- `src/graph/enrichment/repositories.py` - Data access
-- `src/graph/enrichment/queries.py` - Cypher queries
-... [40 more lines]
+### Watch Out
+- PostgreSQL already indexed on `(org_id, attribute_id, target_id, locale)` ✓
+- Breaking change if default behavior changes - recommend opt-in filtering
+- Language API design should be finalized first (per issue description)
+
+### Approach Options
+1. **Opt-in filtering** (safe): Add optional `locale` param, default loads all (backward compatible)
+2. **Default to reference locale** (breaking): Better perf but requires migration
 ```
 
 ## Workflow
 
 ### 1. Fetch Issue
 
-**Linear** (ID like `CER-123`):
+**Linear** (ID like `BE-123`, `CER-123`, `PRO-123`):
 ```
 mcp__linear__get_issue(id: "$ARGUMENTS")
 ```
@@ -74,23 +91,38 @@ gh issue view <number> --json title,body,labels
 mcp__linear__list_issues(state: "triage", limit: 10)
 ```
 
-### 2. Quick Codebase Scan
+### 2. Codebase Exploration
 
-Use Grep/Glob to identify the likely area - don't do deep exploration:
+**Use the Explore agent** to understand the relevant architecture:
 
+```
+Task(subagent_type="Explore", prompt="
+I need to understand [area] for issue [ID]: [title]
+
+Find:
+1. Current implementation and data flow
+2. Specific files and line numbers that would change
+3. Architectural patterns in use
+4. Any non-obvious dependencies or gotchas
+")
+```
+
+**For simpler issues**, Grep/Glob may suffice:
 - Search for keywords from the issue title/description
-- Identify 1-2 primary code locations
-- Note if it crosses domain boundaries (→ Medium/Large)
+- Identify primary code locations
+- Note if it crosses domain boundaries
 
-**DO NOT** do full codebase exploration. Save that for `/brainstorm` or `/implement`.
+**DO NOT guess** - if you can't find the relevant code, say so.
 
-### 3. Generate Brief Analysis
+### 3. Generate Analysis
 
-Fill in the template:
-- **Area**: The 1-2 most relevant paths
-- **Size**: Quick gut check based on scope
-- **Watch out**: Only mention non-obvious things (migrations, breaking changes, etc.)
-- **❓**: Only if the issue is genuinely unclear
+Fill in the template with:
+- **Current State**: What exists today (be specific)
+- **Files to Change**: Actual paths + line numbers from your exploration
+- **Size Estimate**: Based on file count and complexity you found
+- **Watch Out**: Breaking changes, migrations, dependencies, test impacts
+- **Approach Options**: Only for issues with genuine design choices
+- **❓ Questions**: Only if issue is genuinely unclear
 
 ### 4. Confirm and Update
 
@@ -118,23 +150,36 @@ gh issue comment <number> --body "<analysis>"
 If processing multiple issues:
 ```
 Triaged 4 issues:
-- CER-123: Added (Medium)
-- CER-124: Added (Small)
-- CER-125: Skipped - needs reporter clarification
-- CER-126: Added (Large)
+- BE-123: Added (Medium) - Attribute lazy-loading
+- BE-124: Added (Small) - Translation prompt fix
+- BE-125: Skipped - needs reporter clarification on reproduction steps
+- BE-126: Added (Large) - LLM batching infrastructure
 ```
 
 ## Guidelines
 
-- **Brevity over completeness** - 5-8 lines, not 50
-- **Honest about uncertainty** - "❓ Unclear what X means" is better than guessing
-- **No implementation details** - that's for `/brainstorm` and `/implement`
+- **Actionable over brief** - Provide enough detail that someone can estimate the work
+- **Specific file references** - Include line numbers when relevant (e.g., `:216-264`)
+- **Honest about uncertainty** - "Could not locate relevant code" is better than guessing
+- **Current state context** - Explain what exists before listing what changes
+- **Skip approach options** for simple issues - only include when there are genuine design choices
 - **Always confirm** before updating the issue
+
+## Anti-patterns to Avoid
+
+❌ Vague paths without line numbers: `src/core/enrichment/`
+✅ Specific references: `src/core/cernel/core/enrichment/services.py:42-67`
+
+❌ Generic size labels: `Size: Medium`
+✅ Justified estimates: `Medium - 4 files across repository and API layers`
+
+❌ Guessing at architecture: `Probably uses the standard pattern`
+✅ Verified understanding: `Uses AttributeValueRepository ABC with PostgreSQL impl`
 
 ## Begin
 
 1. Parse: **$ARGUMENTS**
 2. Fetch the issue(s)
-3. Quick scan for area + size
-4. Generate brief analysis (5-8 lines)
+3. Use Explore agent for substantive codebase analysis
+4. Generate detailed analysis with specific file references
 5. Confirm before updating
