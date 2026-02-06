@@ -106,8 +106,8 @@ For anything that looks public but might be dead:
 
 After removals:
 
-- Run `task lint` to verify no errors introduced
-- Run `task test` to verify tests still pass
+- Run linting to verify no errors introduced
+- Run tests to verify tests still pass
 - Remove any imports that became unused due to other removals
 
 ## Output Format
@@ -132,14 +132,14 @@ Track your work with clear reporting:
 ## Tools to Use
 
 ```bash
-# Static analysis for unused code
-task lint
+# Static analysis for unused code - use project's lint command
+# Use project's lint command (e.g., task lint, make lint, npm run lint)
 
 # Search for references (use Grep tool, not bash)
 # Search for "function_name" across all files
 
-# Run tests after changes
-task test
+# Run tests after changes - use project's test command
+# Use project's test command (e.g., task test, make test, pytest, npm test)
 ```
 
 ## Codebase-Specific Considerations
@@ -162,4 +162,4 @@ For this Python/Django/FastAPI codebase:
 4. Report findings and removals as you go
 5. Run verification after each batch of changes
 
-Start by running `task lint` to see current state and identify any existing unused import/variable warnings, then explore the codebase structure.
+Start by running the project's linting tool to see current state and identify any existing unused import/variable warnings, then explore the codebase structure.

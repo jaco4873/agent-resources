@@ -17,7 +17,7 @@ Perform a thorough weakness analysis of **$ARGUMENTS** and produce a comprehensi
 The scope (`$ARGUMENTS`) can be:
 
 - **Full repository**: "entire codebase", "all", "everything"
-- **Package/directory**: "src/core", "src/graph", "platform_v2/workflows"
+- **Package/directory**: "src/models", "src/services", "src/api"
 - **Domain**: "taxonomy", "attributes", "authentication", "API layer"
 - **Programming primitive**: "error handling", "logging", "validation", "type hints"
 - **Pattern**: "repository pattern usage", "service layer", "dependency injection"
@@ -88,8 +88,8 @@ Parse `$ARGUMENTS` to determine:
 
 If analyzing a domain (e.g., "taxonomy"), identify all related files:
 
-- Domain models in `src/core/`
-- Repositories in `src/graph/`
+- Domain models and core logic
+- Repositories and data access
 - Services
 - API endpoints
 - Workflows

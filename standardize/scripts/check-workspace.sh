@@ -12,7 +12,7 @@ echo "Branch: $BRANCH"
 
 # Check if inside a worktree
 TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null)
-GIT_COMMON_DIR=$(git rev-parse --git-common-dir 2>/dev/null)
+GIT_COMMON_DIR=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)" && pwd)
 GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
 
 if [ "$GIT_DIR" != "$GIT_COMMON_DIR" ]; then

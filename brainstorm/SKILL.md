@@ -90,8 +90,6 @@ Explore [relevant area] to understand:
 
 Also read:
 
-- `CLAUDE.md` for documented patterns
-- Domain-specific CLAUDE.md files
 - Existing implementations of similar features
 
 #### 2.3 Summarize Findings

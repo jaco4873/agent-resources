@@ -51,25 +51,25 @@ Use this structured template (adapt sections based on issue complexity):
 ## 🤖 AI Triage
 
 ### Current State
-Attribute value translations are stored in PostgreSQL with `data_by_locale: dict[Locale, AttributeValueData]`. Every query fetches ALL locales via `get_latest_attribute_value()`, even when only one is needed.
+User preferences are stored in PostgreSQL with `settings: dict[str, Any]`. Every query fetches ALL settings via `get_user_settings()`, even when only one key is needed.
 
 ### Files to Change
-1. **Repository interface**: `src/core/cernel/core/attribute_value/repository/attribute_value.py` - Add `locale` param
-2. **PostgreSQL impl**: `src/infrastructure/cernel/postgres/repository/attribute_value.py:216-264` - Filter SQL by locale
-3. **Neo4j queries**: `src/graph/cernel/graph/queries/attribute.py:28-43` - Add locale filter to translation matching
-4. **API router**: `src/internal_api/cernel/internal_api/routers/attributes.py` - Accept `?locale=` query param
+1. **Repository interface**: `src/core/user/repository.py` - Add `key` param
+2. **Database impl**: `src/infrastructure/postgres/user_repository.py:216-264` - Filter SQL by key
+3. **Service layer**: `src/core/user/service.py:28-43` - Pass key parameter through
+4. **API router**: `src/api/routers/users.py` - Accept `?key=` query param
 
 ### Size Estimate
-**Medium** - 4 files across repository, query, and API layers. Pattern is clear but touches multiple tiers.
+**Medium** - 4 files across repository, service, and API layers. Pattern is clear but touches multiple tiers.
 
 ### Watch Out
-- PostgreSQL already indexed on `(org_id, attribute_id, target_id, locale)` ✓
+- Database already indexed on `(user_id, key)` ✓
 - Breaking change if default behavior changes - recommend opt-in filtering
-- Language API design should be finalized first (per issue description)
+- API design should be finalized first (per issue description)
 
 ### Approach Options
-1. **Opt-in filtering** (safe): Add optional `locale` param, default loads all (backward compatible)
-2. **Default to reference locale** (breaking): Better perf but requires migration
+1. **Opt-in filtering** (safe): Add optional `key` param, default loads all (backward compatible)
+2. **Default to single key** (breaking): Better perf but requires migration
 ```
 
 ## Workflow
@@ -167,8 +167,8 @@ Triaged 4 issues:
 
 ## Anti-patterns to Avoid
 
-❌ Vague paths without line numbers: `src/core/enrichment/`
-✅ Specific references: `src/core/cernel/core/enrichment/services.py:42-67`
+❌ Vague paths without line numbers: `src/services/`
+✅ Specific references: `src/services/enrichment/service.py:42-67`
 
 ❌ Generic size labels: `Size: Medium`
 ✅ Justified estimates: `Medium - 4 files across repository and API layers`

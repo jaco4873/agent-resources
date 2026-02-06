@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Auto-detect if we're in a worktree
-GIT_COMMON_DIR=$(git rev-parse --git-common-dir 2>/dev/null)
+GIT_COMMON_DIR=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)" && pwd)
 GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
 MAIN_REPO=$(dirname "$GIT_COMMON_DIR")
 

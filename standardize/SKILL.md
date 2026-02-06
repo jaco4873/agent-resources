@@ -92,7 +92,7 @@ Extract from `$ARGUMENTS`:
 
 If unclear, use `AskUserQuestion` to clarify:
 
-- Which specific convention? (reference CLAUDE.md section if applicable)
+- Which specific convention?
 - What's the target scope?
 - Are there any exclusions?
 
@@ -102,17 +102,15 @@ If unclear, use `AskUserQuestion` to clarify:
 
 Look for the convention in:
 
-1. `CLAUDE.md` - Main project conventions
-2. Domain-specific `CLAUDE.md` files (e.g., `src/graph/CLAUDE.md`)
-3. Existing exemplary implementations
+1. Existing exemplary implementations
+2. Project documentation and conventions files
 
 ```
 Use Task tool with Explore agent:
 
 Find the canonical definition and examples of [CONVENTION]:
-1. Search CLAUDE.md files for documentation
-2. Find 2-3 existing implementations that follow the pattern correctly
-3. Identify the key characteristics that define "correct" usage
+1. Find 2-3 existing implementations that follow the pattern correctly
+2. Identify the key characteristics that define "correct" usage
 ```
 
 #### 2.2 If Pattern Has Variants
@@ -346,13 +344,13 @@ For uncertain cases (if user approved):
 
 #### 7.1 Run Linting
 
-Run the project's linting suite. Check `CLAUDE.md` or project config for the correct command (e.g., `task lint`, `make lint`, `npm run lint`).
+Run the project's linting suite (e.g., `task lint`, `make lint`, `npm run lint`).
 
 Fix any issues introduced by the changes.
 
 #### 7.2 Run Tests
 
-Run the project's test suite. Check `CLAUDE.md` or project config for the correct command (e.g., `task test`, `make test`, `pytest`, `npm test`).
+Run the project's test suite (e.g., `task test`, `make test`, `pytest`, `npm test`).
 
 If tests fail:
 

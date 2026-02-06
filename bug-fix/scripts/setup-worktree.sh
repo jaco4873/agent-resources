@@ -11,7 +11,8 @@ SHORT_DESC="${2:?Usage: setup-worktree.sh <branch-name> <short-desc> [base-ref]}
 BASE_REF="${3:-origin/main}"
 
 # Resolve the main repo root (works from within worktrees too)
-MAIN_REPO=$(git rev-parse --git-common-dir 2>/dev/null | xargs dirname)
+GIT_COMMON_DIR=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)" && pwd)
+MAIN_REPO=$(dirname "$GIT_COMMON_DIR")
 REPO_NAME=$(basename "$MAIN_REPO")
 WORKTREE_DIR="$(dirname "$MAIN_REPO")/${REPO_NAME}-bugfix-${SHORT_DESC}"
 

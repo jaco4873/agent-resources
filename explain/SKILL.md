@@ -87,13 +87,11 @@ Based on the explanation type, use appropriate exploration strategies:
 
 1. **Understand the layer structure**:
 
-    - Read `CLAUDE.md` for architecture overview
-    - Check domain-specific CLAUDE.md files
     - Explore directory structure
 
 2. **Find pattern implementations**:
 
-    - ABC/Protocol definitions in `src/core/`
+    - ABC/Protocol/Interface definitions in domain layer
     - Concrete implementations across packages
 
 3. **Map dependencies**:
@@ -169,12 +167,6 @@ Always include:
 - Point to actual code, not abstract descriptions
 - Include file paths and line numbers
 - Show real patterns from the codebase
-
-### Connect to CLAUDE.md
-
-- Reference documented patterns
-- Explain how conventions are applied
-- Link to relevant sections for deeper reading
 
 ### Make It Actionable
 

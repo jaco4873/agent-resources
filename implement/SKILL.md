@@ -233,7 +233,6 @@ For each step:
 
 - **Type hints**: All functions must have proper type hints
 - **Docstrings**: Public APIs need Google-style docstrings
-- **Patterns**: Follow patterns from `CLAUDE.md`
 - **No over-engineering**: Only implement what's needed
 
 ### Phase 7: Verification
@@ -242,13 +241,13 @@ After implementation is complete:
 
 #### 7.1 Run Tests
 
-Run the project's test suite. Check `CLAUDE.md`, `Makefile`, `Taskfile.yml`, or `package.json` for the correct command (e.g., `task test`, `make test`, `npm test`, `pytest`).
+Run the project's test suite (e.g., `task test`, `make test`, `npm test`, `pytest`).
 
 Ensure all tests pass. Fix any failures before proceeding.
 
 #### 7.2 Run Linting and Type Checking
 
-Run the project's linting/type-checking suite. Check `CLAUDE.md` or project config for the correct command (e.g., `task lint`, `make lint`, `npm run lint`)
+Run the project's linting/type-checking suite (e.g., `task lint`, `make lint`, `npm run lint`).
 
 Fix any issues.
 

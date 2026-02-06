@@ -276,7 +276,7 @@ def test_taxonomy_service_handles_missing_parent_gracefully(self) -> None:
 
 Run the test to confirm it fails with the expected error:
 
-Run the specific test using the project's test runner. Check `CLAUDE.md` or project config for the correct command (e.g., `task test`, `make test`, `pytest`, `npm test`).
+Run the specific test using the project's test runner (e.g., `task test`, `make test`, `pytest`, `npm test`).
 
 The test MUST fail before you proceed. This confirms:
 
@@ -316,7 +316,7 @@ Make the necessary code changes:
 
 Run the failing test again:
 
-Run the specific test using the project's test runner. Check `CLAUDE.md` or project config for the correct command (e.g., `task test`, `make test`, `pytest`, `npm test`).
+Run the specific test using the project's test runner (e.g., `task test`, `make test`, `pytest`, `npm test`).
 
 The test MUST pass now.
 
@@ -328,7 +328,7 @@ Run tests for the affected module to ensure no regressions were introduced.
 
 #### 6.2 Run Full Verification
 
-Run the project's full test suite and linting. Check `CLAUDE.md` or project config for the correct commands (e.g., `task test && task lint`, `make check`, `npm run lint && npm test`).
+Run the project's full test suite and linting (e.g., `task test && task lint`, `make check`, `npm run lint && npm test`).
 
 All tests must pass, all linting must pass.
 
