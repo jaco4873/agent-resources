@@ -12,7 +12,8 @@ BASE_REF="${3:-origin/main}"
 
 # Resolve the main repo root (works from within worktrees too)
 MAIN_REPO=$(git rev-parse --git-common-dir 2>/dev/null | xargs dirname)
-WORKTREE_DIR="$(dirname "$MAIN_REPO")/cernel-backend-standardize-${CONVENTION_SLUG}"
+REPO_NAME=$(basename "$MAIN_REPO")
+WORKTREE_DIR="$(dirname "$MAIN_REPO")/${REPO_NAME}-standardize-${CONVENTION_SLUG}"
 
 echo "=== Setting Up Worktree ==="
 echo "Branch:    $BRANCH_NAME"
