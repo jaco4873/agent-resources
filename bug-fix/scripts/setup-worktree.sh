@@ -68,4 +68,10 @@ echo "Directory: $WORKTREE_DIR"
 echo "Branch:    $BRANCH_NAME"
 echo "Base:      $BASE_REF"
 echo ""
+if command -v code &>/dev/null; then
+    echo "Opening IDE..."
+    code "$WORKTREE_DIR"
+else
+    echo "Note: 'code' command not found - skipping IDE launch."
+fi
 echo "To start working: cd $WORKTREE_DIR"
