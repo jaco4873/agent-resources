@@ -34,10 +34,13 @@ Before starting standardization, determine where to work.
 
 #### 0.1 Check Current State
 
+Run the workspace check script to understand the current environment:
+
 ```bash
-git status
-git branch --show-current
+.claude/skills/standardize/scripts/check-workspace.sh
 ```
+
+This reports: current branch, worktree status, uncommitted changes, remote tracking, existing worktrees, and recent commits - all in a single invocation.
 
 #### 0.2 Ask About Worktree
 
@@ -47,39 +50,38 @@ Use `AskUserQuestion`:
 Where should I apply this standardization?
 
 **Option A: New worktree** (Recommended for large scopes)
-- Creates isolated workspace
+- Creates isolated workspace branched from origin/main
+- Copies .env files automatically
 - Safe for sweeping changes across many files
 - Allows multiple agents to work simultaneously
 
 **Option B: Current worktree**
+- Creates branch from origin/main in current checkout
 - Simpler, no setup overhead
 - Good for small, contained scopes
 ```
 
 #### 0.3 Set Up Workspace
 
-**If new worktree**:
+**If new worktree** - run the setup script:
 ```bash
-# Create branch and worktree
-git worktree add ../cernel-backend-standardize-<convention> -b refactor/standardize-<convention>
-
-# Copy environment files (required - these are gitignored)
-cp .env* ../cernel-backend-standardize-<convention>/
-
-# Copy local Claude settings if they exist
-cp -r .claude/settings.local.json ../cernel-backend-standardize-<convention>/.claude/ 2>/dev/null || true
-
-# Navigate to worktree
-cd ../cernel-backend-standardize-<convention>
-
-# Install dependencies (venv is gitignored, so must be recreated)
-uv sync --all-packages
+.claude/skills/standardize/scripts/setup-worktree.sh "refactor/standardize-<convention>" "<convention-slug>"
 ```
+
+This automatically:
+- Fetches latest from origin
+- Creates a new worktree + branch from `origin/main`
+- Copies all `.env*` files from the main repo
+- Reports the new directory path
+
+After it completes, `cd` into the new worktree directory it prints.
 
 **If current worktree**:
 ```bash
-git checkout -b refactor/standardize-<convention>
+git fetch origin main --quiet && git checkout -b refactor/standardize-<convention> origin/main
 ```
+
+**Base branch**: Always `origin/main` unless the user explicitly specifies a different base.
 
 ### Phase 1: Parse Input
 
@@ -460,15 +462,22 @@ Claude PR review will automatically add deeper analysis after the PR is created.
 
 #### 9.3 Clean Up Worktree (If Applicable)
 
-If working in a separate worktree, inform the user:
+If working in a separate worktree, offer cleanup:
 
+Use `AskUserQuestion`:
 ```
-PR created: <link>
+PR created. Would you like me to clean up the worktree?
 
-Note: You're in worktree `../cernel-backend-standardize-<convention>`.
-To return to main workspace: cd ../cernel_backend
-To remove worktree later: git worktree remove ../cernel-backend-standardize-<convention>
+- Yes, remove the worktree and switch back to main repo
+- No, keep the worktree around
 ```
+
+If yes, run the cleanup script:
+```bash
+.claude/skills/standardize/scripts/cleanup-worktree.sh
+```
+
+This checks for uncommitted changes, navigates back to the main repo, and removes the worktree.
 
 #### 9.4 Remaining Work
 

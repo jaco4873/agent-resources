@@ -28,10 +28,13 @@ Before starting implementation, determine where to work.
 
 #### 0.1 Check Current State
 
+Run the workspace check script to understand the current environment:
+
 ```bash
-git status
-git branch --show-current
+.claude/skills/implement/scripts/check-workspace.sh
 ```
+
+This reports: current branch, worktree status, uncommitted changes, remote tracking, existing worktrees, and recent commits - all in a single invocation.
 
 #### 0.2 Ask About Worktree
 
@@ -41,40 +44,38 @@ Use `AskUserQuestion`:
 Where should I implement this change?
 
 **Option A: New worktree** (Recommended for parallel work)
-- Creates isolated workspace
+- Creates isolated workspace branched from origin/main
+- Copies .env files automatically
 - Safe for experimental changes
 - Allows multiple agents to work simultaneously
 
 **Option B: Current worktree**
+- Creates branch from origin/main in current checkout
 - Simpler, no setup overhead
 - Good for sequential, focused work
 ```
 
 #### 0.3 Set Up Workspace
 
-**If new worktree**:
+**If new worktree** - run the setup script:
 ```bash
-# Create branch and worktree
-git worktree add ../cernel-backend-<issue-id> -b <branch-name>
-
-# Copy environment files (required - these are gitignored)
-cp .env* ../cernel-backend-<issue-id>/
-
-# Copy local Claude settings if they exist
-cp -r .claude/settings.local.json ../cernel-backend-<issue-id>/.claude/ 2>/dev/null || true
-
-# Navigate to worktree
-cd ../cernel-backend-<issue-id>
-
-# Install dependencies (venv is gitignored, so must be recreated)
-uv sync --all-packages
+.claude/skills/implement/scripts/setup-worktree.sh "<branch-name>" "<issue-id>"
 ```
+
+This automatically:
+- Fetches latest from origin
+- Creates a new worktree + branch from `origin/main`
+- Copies all `.env*` files from the main repo
+- Reports the new directory path
+
+After it completes, `cd` into the new worktree directory it prints.
 
 **If current worktree**:
 ```bash
-# Create branch from current HEAD
-git checkout -b <branch-name>
+git fetch origin main --quiet && git checkout -b <branch-name> origin/main
 ```
+
+**Base branch**: Always `origin/main` unless the user explicitly specifies a different base. If the user specifies a different base, pass it as the third argument to setup-worktree.sh.
 
 Branch naming: `<type>/<issue-id>-<short-description>`
 - Example: `feat/LIN-123-add-taxonomy-caching`
@@ -279,9 +280,26 @@ Provide a summary of changes:
 - Linting passing
 ```
 
+### Phase 7.5: Review Changes (Automated)
+
+**CRITICAL**: Before creating a PR, invoke the `/review-changes` skill. This spins off an isolated sub-agent that independently reviews all changes on the branch for correctness, missed callers, breaking API changes, and overall impact.
+
+```
+Invoke: /review-changes
+```
+
+After the review completes:
+
+1. **Read the review report** carefully
+2. **If "Needs Attention"**: Address the issues found before proceeding to PR. Then re-run `/review-changes` to verify fixes.
+3. **If "Minor Issues"**: Fix the listed items, then proceed to PR creation.
+4. **If "Ready"**: Proceed directly to PR creation.
+
+Present the review findings to the user and ask whether to proceed or address issues first.
+
 ### Phase 8: Pull Request
 
-After verification passes, offer to create a PR.
+After verification and review passes, offer to create a PR.
 
 #### 8.1 Ask About PR Creation
 
@@ -336,15 +354,22 @@ Claude PR review will automatically add deeper analysis after the PR is created.
 
 #### 8.3 Clean Up Worktree (If Applicable)
 
-If working in a separate worktree, inform the user:
+If working in a separate worktree, offer cleanup:
 
+Use `AskUserQuestion`:
 ```
-PR created: <link>
+PR created. Would you like me to clean up the worktree?
 
-Note: You're in worktree `../cernel-backend-<issue-id>`.
-To return to main workspace: cd ../cernel_backend
-To remove worktree later: git worktree remove ../cernel-backend-<issue-id>
+- Yes, remove the worktree and switch back to main repo
+- No, keep the worktree around
 ```
+
+If yes, run the cleanup script:
+```bash
+.claude/skills/implement/scripts/cleanup-worktree.sh
+```
+
+This checks for uncommitted changes, navigates back to the main repo, and removes the worktree.
 
 ## Integration with /brainstorm
 
@@ -364,15 +389,28 @@ When used standalone (not from brainstorm):
 3. Planning phase is more exploratory
 4. All decisions must be made fresh
 
+## Scripts Reference
+
+Helper scripts in `.claude/skills/implement/scripts/`:
+
+| Script                 | Purpose                                             |
+| ---------------------- | --------------------------------------------------- |
+| `check-workspace.sh`   | Report current branch, changes, worktrees, tracking |
+| `setup-worktree.sh`    | Create worktree from origin/main with env files     |
+| `cleanup-worktree.sh`  | Remove worktree after PR creation                   |
+
 ## Tools Reference
 
 | Phase                | Tools                               |
 | -------------------- | ----------------------------------- |
+| Workspace Setup      | Bash (scripts)                      |
 | Issue Fetching       | `mcp__linear__get_issue`, Bash (gh) |
 | Codebase Exploration | Task (Explore agent)                |
 | Clarification        | `AskUserQuestion`                   |
 | Implementation       | Edit, Write, Read                   |
-| Verification         | Bash (task test, task lint)         |
+| Verification         | Bash (task test, task lint)          |
+| Review Changes       | `/review-changes` (forked agent)    |
+| Worktree Cleanup     | Bash (scripts)                      |
 
 ## Key Principles
 
@@ -396,10 +434,13 @@ When used standalone (not from brainstorm):
 
 ## Begin
 
-1. Parse the issue ID: **$ARGUMENTS**
-2. Detect source (Linear or GitHub)
-3. Fetch issue details
-4. Check for and fetch parent context
-5. Begin codebase exploration
+1. Run `.claude/skills/implement/scripts/check-workspace.sh` to assess current state
+2. Parse the issue ID: **$ARGUMENTS**
+3. Detect source (Linear or GitHub)
+4. Ask about workspace setup
+5. Set up workspace (script or manual)
+6. Fetch issue details
+7. Check for and fetch parent context
+8. Begin codebase exploration
 
-**Start by fetching the issue details.**
+**Start by running the workspace check script and fetching the issue details in parallel.**
