@@ -10,10 +10,10 @@ Apply a documented convention or pattern consistently across a specified scope i
 
 **Example invocations**:
 
-- `/standardize error handling in src/graph/`
-- `/standardize repository pattern in taxonomy domain`
-- `/standardize gRPC-style exceptions across all services`
-- `/standardize type hints in src/core/ai_suggestions/`
+- `/standardize error handling in src/services/`
+- `/standardize repository pattern in user domain`
+- `/standardize logging across all modules`
+- `/standardize type hints in src/utils/`
 
 ## When to Use This Skill
 
@@ -346,17 +346,13 @@ For uncertain cases (if user approved):
 
 #### 7.1 Run Linting
 
-```bash
-task lint
-```
+Run the project's linting suite. Check `CLAUDE.md` or project config for the correct command (e.g., `task lint`, `make lint`, `npm run lint`).
 
 Fix any issues introduced by the changes.
 
 #### 7.2 Run Tests
 
-```bash
-task test
-```
+Run the project's test suite. Check `CLAUDE.md` or project config for the correct command (e.g., `task test`, `make test`, `pytest`, `npm test`).
 
 If tests fail:
 
@@ -491,15 +487,15 @@ If there are items outside the original scope:
 
 ## Common Conventions to Standardize
 
-### Error Handling (gRPC-style)
+### Error Handling
 
-**Target**: Use `NotFoundError`, `InvalidArgumentError`, etc. from `cernel.core.errors`
-**Anti-pattern**: Custom exceptions, `HTTPException` in services, bare `Exception`
+**Target**: Consistent error/exception types across the codebase
+**Anti-pattern**: Mixed exception styles, `HTTPException` in services, bare `except Exception`
 **Scope**: Usually by domain or layer
 
 ### Repository Pattern
 
-**Target**: Repository interface in core, implementation in graph
+**Target**: Repository interface in domain/core, implementation in infrastructure
 **Anti-pattern**: Direct query calls, business logic in repositories
 **Scope**: By domain
 
@@ -511,14 +507,14 @@ If there are items outside the original scope:
 
 ### Logging
 
-**Target**: Structured logging with `structlog`
-**Anti-pattern**: Print statements, standard library `logging`
+**Target**: Consistent structured logging throughout the codebase
+**Anti-pattern**: Print statements, inconsistent log levels or formats
 **Scope**: Entire codebase
 
 ### Docstrings
 
-**Target**: Google-style docstrings on public APIs
-**Anti-pattern**: Missing docstrings, incorrect format
+**Target**: Consistent docstring format on public APIs
+**Anti-pattern**: Missing docstrings, mixed formats
 **Scope**: By module
 
 ## Guidelines

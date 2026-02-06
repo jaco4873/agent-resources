@@ -25,8 +25,8 @@ For each changed file, evaluate:
 
 - **Logic**: Are conditionals, loops, and return values correct? Are edge cases handled (empty lists, None, missing keys)?
 - **Type safety**: Do all new/modified functions have complete type hints? Are Pydantic models used correctly?
-- **Error handling**: Are exceptions the correct gRPC-style types from `cernel.core.errors`? No broad `except Exception` catch-alls? Errors propagated, not swallowed?
-- **Naming & conventions**: Do names follow codebase conventions? Repository methods use domain terminology (not database-specific)?
+- **Error handling**: Are exceptions the correct types per codebase conventions (check `CLAUDE.md`)? No broad `except Exception` catch-alls? Errors propagated, not swallowed?
+- **Naming & conventions**: Do names follow codebase conventions? Methods use domain terminology?
 
 ## Phase 3: Impact Analysis — Callers and Dependents
 

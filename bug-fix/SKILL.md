@@ -28,10 +28,13 @@ Before starting the fix, determine where to work.
 
 #### 0.1 Check Current State
 
+Run the workspace check script to understand the current environment:
+
 ```bash
-git status
-git branch --show-current
+.claude/skills/bug-fix/scripts/check-workspace.sh
 ```
+
+This reports: current branch, worktree status, uncommitted changes, remote tracking, existing worktrees, and recent commits - all in a single invocation.
 
 #### 0.2 Ask About Worktree
 
@@ -41,39 +44,38 @@ Use `AskUserQuestion`:
 Where should I work on this bug fix?
 
 **Option A: New worktree** (Recommended for parallel work)
-- Creates isolated workspace
+- Creates isolated workspace branched from origin/main
+- Copies .env files automatically
 - Safe if the fix might be experimental
 - Allows multiple agents to work simultaneously
 
 **Option B: Current worktree**
+- Creates branch from origin/main in current checkout
 - Simpler, no setup overhead
 - Good for quick, focused fixes
 ```
 
 #### 0.3 Set Up Workspace
 
-**If new worktree**:
+**If new worktree** - run the setup script:
 ```bash
-# Create branch and worktree
-git worktree add ../cernel-backend-bugfix-<short-desc> -b fix/<short-description>
-
-# Copy environment files (required - these are gitignored)
-cp .env* ../cernel-backend-bugfix-<short-desc>/
-
-# Copy local Claude settings if they exist
-cp -r .claude/settings.local.json ../cernel-backend-bugfix-<short-desc>/.claude/ 2>/dev/null || true
-
-# Navigate to worktree
-cd ../cernel-backend-bugfix-<short-desc>
-
-# Install dependencies (venv is gitignored, so must be recreated)
-uv sync --all-packages
+.claude/skills/bug-fix/scripts/setup-worktree.sh "fix/<short-description>" "<short-desc>"
 ```
+
+This automatically:
+- Fetches latest from origin
+- Creates a new worktree + branch from `origin/main`
+- Copies all `.env*` files from the main repo
+- Reports the new directory path
+
+After it completes, `cd` into the new worktree directory it prints.
 
 **If current worktree**:
 ```bash
-git checkout -b fix/<short-description>
+git fetch origin main --quiet && git checkout -b fix/<short-description> origin/main
 ```
+
+**Base branch**: Always `origin/main` unless the user explicitly specifies a different base.
 
 ### Phase 1: Parse the Error
 
@@ -224,9 +226,9 @@ Run the reproduction to confirm the bug exists. If it doesn't reproduce, revisit
 
 Determine where the test should go:
 
-- Unit test: `tests/core/...` or `tests/graph/...`
+- Unit test: Alongside existing unit tests for the affected module
 - Integration test: Based on the component
-- Follow existing test patterns in the repository
+- Follow existing test patterns and directory structure in the repository
 
 #### 4.2 Write a Minimal Failing Test
 
@@ -274,9 +276,7 @@ def test_taxonomy_service_handles_missing_parent_gracefully(self) -> None:
 
 Run the test to confirm it fails with the expected error:
 
-```bash
-task test -- tests/path/to/test_file.py::TestClass::test_method -v
-```
+Run the specific test using the project's test runner. Check `CLAUDE.md` or project config for the correct command (e.g., `task test`, `make test`, `pytest`, `npm test`).
 
 The test MUST fail before you proceed. This confirms:
 
@@ -316,9 +316,7 @@ Make the necessary code changes:
 
 Run the failing test again:
 
-```bash
-task test -- tests/path/to/test_file.py::TestClass::test_method -v
-```
+Run the specific test using the project's test runner. Check `CLAUDE.md` or project config for the correct command (e.g., `task test`, `make test`, `pytest`, `npm test`).
 
 The test MUST pass now.
 
@@ -326,20 +324,11 @@ The test MUST pass now.
 
 #### 6.1 Run Related Tests
 
-Run tests for the affected module:
-
-```bash
-task test -- tests/path/to/module/
-```
-
-Ensure no regressions were introduced.
+Run tests for the affected module to ensure no regressions were introduced.
 
 #### 6.2 Run Full Verification
 
-```bash
-task lint
-task test
-```
+Run the project's full test suite and linting. Check `CLAUDE.md` or project config for the correct commands (e.g., `task test && task lint`, `make check`, `npm run lint && npm test`).
 
 All tests must pass, all linting must pass.
 
@@ -431,15 +420,22 @@ Claude PR review will automatically add deeper analysis after the PR is created.
 
 #### 8.3 Clean Up Worktree (If Applicable)
 
-If working in a separate worktree, inform the user:
+If working in a separate worktree, offer cleanup:
 
+Use `AskUserQuestion`:
 ```
-PR created: <link>
+PR created. Would you like me to clean up the worktree?
 
-Note: You're in worktree `../cernel-backend-bugfix-<desc>`.
-To return to main workspace: cd ../cernel_backend
-To remove worktree later: git worktree remove ../cernel-backend-bugfix-<desc>
+- Yes, remove the worktree and switch back to main repo
+- No, keep the worktree around
 ```
+
+If yes, run the cleanup script:
+```bash
+.claude/skills/bug-fix/scripts/cleanup-worktree.sh
+```
+
+This checks for uncommitted changes, navigates back to the main repo, and removes the worktree.
 
 ## Key Principles
 
