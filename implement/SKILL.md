@@ -146,11 +146,11 @@ Find:
 5. Integration points and dependencies
 
 Focus on:
-- src/core/ for domain models
-- src/graph/ for repositories
-- src/internal_api/ for API endpoints
-- platform_v2/workflows/ for Temporal workflows
-- tests/ for testing patterns
+- Domain models and core business logic
+- Repositories and data access layers
+- API endpoints and controllers
+- Background jobs and workflows
+- Tests and testing patterns
 ```
 
 The Explore agent will return:
@@ -189,18 +189,13 @@ Structure the plan clearly:
 
 ```markdown
 ### Files to Modify
+[Group by architectural layer as appropriate for this codebase]
 
-#### Domain Layer (src/core/)
-- `path/to/file.py` - [What changes]
-
-#### Repository Layer (src/graph/)
-- `path/to/file.py` - [What changes]
-
-#### API Layer (src/internal_api/)
-- `path/to/file.py` - [What changes]
+- `path/to/file` - [What changes]
+- `path/to/file` - [What changes]
 
 #### Tests
-- `path/to/test.py` - [What to test]
+- `path/to/test` - [What to test]
 
 ### Implementation Steps
 1. [First step with specific details]
@@ -247,19 +242,15 @@ After implementation is complete:
 
 #### 7.1 Run Tests
 
-```bash
-task test
-```
+Run the project's test suite. Check `CLAUDE.md`, `Makefile`, `Taskfile.yml`, or `package.json` for the correct command (e.g., `task test`, `make test`, `npm test`, `pytest`).
 
 Ensure all tests pass. Fix any failures before proceeding.
 
 #### 7.2 Run Linting and Type Checking
 
-```bash
-task lint
-```
+Run the project's linting/type-checking suite. Check `CLAUDE.md` or project config for the correct command (e.g., `task lint`, `make lint`, `npm run lint`)
 
-This runs ruff and mypy. Fix any issues.
+Fix any issues.
 
 #### 7.3 Summary
 
@@ -408,7 +399,7 @@ Helper scripts in `.claude/skills/implement/scripts/`:
 | Codebase Exploration | Task (Explore agent)                |
 | Clarification        | `AskUserQuestion`                   |
 | Implementation       | Edit, Write, Read                   |
-| Verification         | Bash (task test, task lint)          |
+| Verification         | Bash (project test/lint commands)    |
 | Review Changes       | `/review-changes` (forked agent)    |
 | Worktree Cleanup     | Bash (scripts)                      |
 
