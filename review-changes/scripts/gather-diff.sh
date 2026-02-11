@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE="main"
+BASE="origin/main"
 MERGE_BASE=$(git merge-base HEAD "$BASE")
 BRANCH=$(git branch --show-current)
 
