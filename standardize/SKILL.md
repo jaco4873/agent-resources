@@ -65,7 +65,7 @@ Where should I apply this standardization?
 
 **If new worktree** - run the setup script:
 ```bash
-.claude/skills/standardize/scripts/setup-worktree.sh "refactor/standardize-<convention>" "<convention-slug>"
+.claude/skills/standardize/scripts/setup-worktree.sh "refactor/standardize-<convention>"
 ```
 
 This automatically:

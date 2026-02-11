@@ -59,7 +59,7 @@ Where should I work on this bug fix?
 
 **If new worktree** - run the setup script:
 ```bash
-.claude/skills/bug-fix/scripts/setup-worktree.sh "fix/<short-description>" "<short-desc>"
+.claude/skills/bug-fix/scripts/setup-worktree.sh "fix/<short-description>"
 ```
 
 This automatically:

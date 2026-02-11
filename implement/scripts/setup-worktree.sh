@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
 # setup-worktree.sh - Creates a new worktree from origin/main with env files copied
-# Usage: setup-worktree.sh <branch-name> <issue-id> [base-ref]
+# Usage: setup-worktree.sh <branch-name> [base-ref]
 #   branch-name: e.g. feat/LIN-123-add-caching
-#   issue-id:    e.g. LIN-123 (used for worktree directory name)
 #   base-ref:    optional, defaults to origin/main
 set -euo pipefail
 
-BRANCH_NAME="${1:?Usage: setup-worktree.sh <branch-name> <issue-id> [base-ref]}"
-ISSUE_ID="${2:?Usage: setup-worktree.sh <branch-name> <issue-id> [base-ref]}"
-BASE_REF="${3:-origin/main}"
+BRANCH_NAME="${1:?Usage: setup-worktree.sh <branch-name> [base-ref]}"
+BASE_REF="${2:-origin/main}"
+
+# Derive directory suffix from branch name (feat/LIN-123-add-caching -> feat-LIN-123-add-caching)
+DIR_SUFFIX=$(echo "$BRANCH_NAME" | tr '/' '-')
 
 # Resolve the main repo root (works from within worktrees too)
 GIT_COMMON_DIR=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)" && pwd)
 MAIN_REPO=$(dirname "$GIT_COMMON_DIR")
 REPO_NAME=$(basename "$MAIN_REPO")
-WORKTREE_DIR="$(dirname "$MAIN_REPO")/${REPO_NAME}-${ISSUE_ID}"
+WORKTREE_DIR="$(dirname "$MAIN_REPO")/${REPO_NAME}-${DIR_SUFFIX}"
 
 echo "=== Setting Up Worktree ==="
 echo "Branch:    $BRANCH_NAME"
@@ -24,7 +25,7 @@ echo ""
 
 # Fetch latest from origin
 echo "Fetching latest from origin..."
-git fetch origin main --quiet
+git fetch origin "${BASE_REF#origin/}" --quiet
 # Also try to fetch the target branch (may not exist on remote)
 git fetch origin "$BRANCH_NAME" --quiet 2>/dev/null || true
 
@@ -62,7 +63,7 @@ fi
 echo ""
 echo "=== Copying Environment Files ==="
 ENV_COUNT=0
-for envfile in "$MAIN_REPO"/.env*; do
+for envfile in "$MAIN_REPO"/.env "$MAIN_REPO"/.env.*; do
     if [ -f "$envfile" ]; then
         BASENAME=$(basename "$envfile")
         cp "$envfile" "$WORKTREE_DIR/$BASENAME"

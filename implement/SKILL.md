@@ -59,7 +59,7 @@ Where should I implement this change?
 
 **If new worktree** - run the setup script:
 ```bash
-.claude/skills/implement/scripts/setup-worktree.sh "<branch-name>" "<issue-id>"
+.claude/skills/implement/scripts/setup-worktree.sh "<branch-name>"
 ```
 
 This automatically:

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-workspace.sh - Reports current workspace state for the implement skill
+# check-workspace.sh - Reports current workspace state
 # Usage: check-workspace.sh
 set -euo pipefail
 
